@@ -2,7 +2,7 @@
 ## Prepare Proxmox environment (host server)
 - Do regular install
 - Install some more useful tools
-```bash
+```console
 # apt install vim mlocate screen mc parted rsync htop iotop nmap tcpdump \
 mtr-tiny net-tools openvswitch-switch
 ```
@@ -18,35 +18,35 @@ Source: [https://pve.proxmox.com/wiki/Cloud-Init_Support#_preparing_cloud_init_t
 Preinstalled images location: http://cloud.centos.org/centos/7/images/
 
 - Download selected image to Proxmox VE
-```bash
+```console
 # mkdir -p /data/ci && \
 cd /data/ci && \
 wget http://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud-1809.qcow2
 ```
 - Create new VM
-```bash
+```console
 # qm create 9000 --memory 512 --net0 virtio,bridge=vmbr0
 ```
 - Import downloaded image to local VM HDD storage (depends on your proxmox implementation)
-```bash
+```console
 # qm importdisk 9000 CentOS-7-x86_64-GenericCloud-1809.qcow2 data-hdd
 ```
 - Attach imported disk to VM
-```bash
+```console
 # qm set 9000 --scsihw virtio-scsi-pci --scsi0 data-hdd:9000/vm-9000-disk-1.raw
 ```
 - Configure to boot from Cloud-Init disk (scsi0)
-```bash
+```console
 # qm set 9000 --boot c --bootdisk scsi0
 ```
 - Configure serial console as external display
-```bash
+```console
 # qm set 9000 --serial0 socket --vga serial0
 ```
 - Boot VM and wait until cloud-init do full OS update. It will sppedup next deployments
 - Stop VM
 - Convert VM to template
-```bash
+```console
 # qm template 9000
 ```
 
@@ -58,16 +58,16 @@ wget http://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud-1809.q
 - Create CentOS-7 VM (RAM:1024MB, HDD:8GB, CPU:1-core-1-thread, LAN:1)
 - Install CentOS-7 minimal
 - Add "***centos***" user with password "***centos***"
-```bash
+```console
 # adduser centos
 # passwd centos
 ```
 - Generate RSA keys for ***root*** and ***centos***
-```bash
+```console
 # ssh-keygen -t rsa
 ```
 - change color prompt for ***root*** and ***centos*** user
-```bash
+```console
 # cat > /root/.bashrc <<EOF
 # .bashrc
 
@@ -85,7 +85,7 @@ fi
 export 'PS1=\[\033[01;31m\][\u@\h \w ]\$ \[\033[00m\]'
 EOF
 ```
-```bash
+```console
 # cat > /home/centos/.bashrc <<EOF
 # .bashrc
 
@@ -104,37 +104,37 @@ export 'PS1=\[\033[01;32m\][\u@\h \[\033[01;34m\]\w \[\033[01;32m\]]\$ \[\033[00
 EOF
 ```
 - Install EPEL repository
-```bash
+```console
 # yum install epel-release
 ```
 - install additional packages
-```bash
+```console
 # yum install  net-tools rsync vim-enhanced nc mc wireshark tcpdump wget strace lynx links sysstat lsof deltarpm mlocate bash-completion nmap telnet screen iotop htop mtr traceroute ntpdate lshw ntp
 ```
 - Disable SELinux
-```bash
+```console
 # sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
 ```
 - Enable multihostname support
-```bash
+```console
 # sed -i 's/multi on/multi off/g' -i /etc/host.conf
 ```
 - Disable and remove NetworkManager and firewall
-```bash
+```console
 # for i in NetworkManager firewalld rhnsd; do systemctl mask $i; done
 # for i in NetworkManager firewalld rhnsd; do systemctl stop $i; done
 # yum remove $(rpm -qa | grep NetworkManager)
 ```
 - Remove unneeded dependencies
-```bash
+```console
 # yum autoremove
 ```
 - Do full upgrade
-```bash
+```console
 # yum upgrade
 ```
 - Install Cloud-Init
-```bash
+```console
 # yum install cloud-init
 ```
 - Stop VM
@@ -159,7 +159,7 @@ https://github.com/Telmate/terraform-provider-proxmox
 # <u>Notes underline</u>
 
 ## Clone VM manually
-```bash
+```console
 # qm clone 9000 222 --name man-test
 # qm set 222 --sshkey ~/.ssh/id_rsa.pub
 # qm set 222 --net0 "virtio,bridge=vmbr0"
@@ -169,39 +169,39 @@ https://github.com/Telmate/terraform-provider-proxmox
 ### Revert template back to VM
 (Example path and VMID 9001. Change with your own values)
 - Remove template flag from VM configuration file
-```bash
+```console
 # sed -i '/template: 1/d' /etc/pve/qemu-server/9001.conf
 ```
 -  Remove VMdisk attribute and change permissions
-```bash
+```console
 # chattr -i /data/hdd/images/9001/base-9001-disk-1.qcow2
 # chmod 640 /data/hdd/images/9001/base-9001-disk-1.qcow2
 ```
 ## Set VM user/pass
-```bash
+```console
 # qm set 123 --ipconfig0 ip=x.x.x.x/yy,gw=x.x.x.x --cipassword="somepassword" --ciuser=root
 ```
 ## Test Proxmox API. User need to have access to all resources
-```bash
+```console
 # curl -k -d "username=root@pam&password=yourpassword" https://ipAddress:8006/api2/json/access/ticket
 ```
 ## set terraform debug. Available debug kevels:  TRACE, DEBUG, INFO, WARN or ERROR 
-```bash
+```console
 # export TF_LOG=DEBUG
 # export TF_LOG_PATH=/tmp/log
 ```
-```bash
+```console
 # cat >> ~/.bash_profile <<EOF
 export TF_LOG=DEBUG
 export TF_LOG_PATH=/tmp/log
 EOF
 ```
 ## Login to qm console to execute commands against VM
-```bash
+```console
 # qm monitor VMID
 ```
 ## Add forwarding manually (example with VM ID 101)
-```bash
+```console
 # qm monitor 101
 Entering Qemu Monitor for VM 101 - type 'help' for help
 qm> netdev_add user,id=net1,hostfwd=tcp::22103-:22
