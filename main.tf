@@ -43,7 +43,7 @@ resource "proxmox_vm_qemu" "cluster" {
 	#	link_down = "false"
 	#}
 	ipconfig0 = "ip=dhcp"
-	ipconfig1 = "ip=10.0.2.15"
+	ipconfig1 = "ip=10.0.2.15/24"
 	ssh_forward_ip = "10.200.1.4"
 	ssh_user = "centos"
 	ssh_private_key = "${file("~/.ssh/id_rsa")}"
