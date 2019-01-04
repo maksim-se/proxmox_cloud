@@ -13,7 +13,7 @@ resource "proxmox_vm_qemu" "cluster" {
 	desc = "kubernetes cluster"
 	target_node = "bve"
 	clone = "centos7-ci-hm"
-	os_type = "cloud-init"
+	os_type = "centos"
 	onboot = "true"
 
 	# node hardware
@@ -35,35 +35,16 @@ resource "proxmox_vm_qemu" "cluster" {
 		firewall = "false"
 		link_down = "false"
 	}
-	#network {
-	#	id = 1
-	#	model = "virtio"
-	#	bridge = "vmbr1"
-	#	firewall = "false"
-	#	link_down = "false"
-	#}
-	ipconfig0 = "ip=dhcp"
-	ipconfig1 = "ip=10.0.2.15/24"
+	#ipconfig0 = "ip=dhcp"
+	ipconfig1 = "ip=dhcp"
 	ssh_forward_ip = "10.200.1.4"
 	ssh_user = "centos"
 	ssh_private_key = "${file("~/.ssh/id_rsa")}"
 	sshkeys = "${file("~/.ssh/id_rsa.pub")}"
 
-	#connection {
-	#	host = "10.200.1.4"
-	#	port = "22"
-	#	type = "ssh"
-	#	timeout = "3m"
-	#	agent = "true"
-	#	agent_identity = ""
-	#	user = "centos"
-	#	password = ""
-	#	private_key = "${file("~/.ssh/id_rsa")}"
-	#	host_key = "${file("~/.ssh/id_rsa.pub")}"
-	#}
-
 	provisioner "remote-exec" {
 		inline = [
+			"dhclient",
 			"ip addr"
 		]
 	}
