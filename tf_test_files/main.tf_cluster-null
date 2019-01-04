@@ -1,0 +1,83 @@
+provider "proxmox" {
+	pm_tls_insecure = true
+	pm_api_url = "${var.v_pm-api-url}"
+	pm_user = "${var.v_pm-user}"
+	pm_password = "${var.v_pm-pass}"
+}
+
+resource "proxmox_vm_qemu" "cluster" {
+
+	# nodes description
+	count = 2
+	name = "kube-${count.index + 1}"
+	desc = "kubernetes cluster"
+	target_node = "bve"
+	clone = "centos7-ci-downloaded"
+	os_type = "cloud-init"
+	onboot = "true"
+
+	# node hardware
+	cores = 2
+	sockets = 1
+	memory = 2048
+	disk {
+		id = "0"
+		storage = "data-hdd"
+		type = "scsi"
+		size = "20G"
+	}
+	
+	# node connectivity
+	network {
+		id = 0
+		model = "virtio"
+		bridge = "vmbr0"
+		firewall = "false"
+		link_down = "false"
+	}
+	ipconfig0 = "ip=dhcp"
+	ssh_forward_ip = "10.200.1.4"
+	ssh_user = "centos"
+	ssh_private_key = "${file("~/.ssh/id_rsa")}"
+	sshkeys = "${file("~/.ssh/id_rsa.pub")}"
+
+	#connection {
+	#	host = "10.200.1.11"
+	#	port = "22"
+	#	type = "ssh"
+	#	timeout = "3m"
+	#	agent = "true"
+	#	agent_identity = ""
+	#	user = "centos"
+	#	password = ""
+	#	private_key = "${file("~/.ssh/id_rsa")}"
+	#	host_key = "${file("~/.ssh/id_rsa.pub")}"
+	#}
+
+	#provisioner "remote-exec" {
+	#	inline = [
+	#		"ip addr"
+	#	]
+	#}
+
+}
+
+resource "null_resource" "cluster" {
+	triggers {
+		cluster_instance_ids = "${join(",", proxmox_vm_qemu.cluster.*.id)}"
+	}
+						
+  connection {
+   host = "${element(proxmox_vm_qemu.cluster.*.ssh_forward_ip, 0)}"
+	 #port = "22"
+	 #type = "ssh"
+	 user = "${element(proxmox_vm_qemu.cluster.*.ssh_user, 0)}"
+	 host_key = "${element(proxmox_vm_qemu.cluster.*.sshkeys, 0)}"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "ip addr"
+    ]
+  }
+}

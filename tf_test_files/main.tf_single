@@ -1,0 +1,82 @@
+provider "proxmox" {
+	pm_tls_insecure = true
+	pm_api_url = "${var.v_pm-api-url}"
+	pm_user = "${var.v_pm-user}"
+	pm_password = "${var.v_pm-pass}"
+}
+
+resource "proxmox_vm_qemu" "kubetest" {
+
+	# node description
+	name = "kube1"
+	desc = "terraform kubernetes cloud-init node"
+	target_node = "bve"
+	clone = "centos7-ci-downloaded"
+	os_type = "cloud-init"
+	onboot = "true"
+
+	# node hardware
+	cores = 2
+	sockets = 1
+	memory = 2048
+	disk {
+		id = "0"
+		storage = "data-hdd"
+		type = "scsi"
+		size = "20G"
+	}
+	
+	# node connectivity
+	network {
+		id = 0
+		model = "virtio"
+		bridge = "vmbr0"
+		firewall = "false"
+		link_down = "false"
+	}
+	ipconfig0 = "ip=10.200.1.11/27,gw=10.200.1.1"
+	ssh_user = "centos"
+	ssh_private_key = "${file("~/.ssh/id_rsa")}"
+	#ssh_private_key = <<EOF
+#-----BEGIN RSA PRIVATE KEY-----
+#MIICXAIBAAKBgQDQm10eCvTI/C+34aexLIah6qzp0aC1am7QrZYIXLa6UaDHCJ6d
+#aLw+ErBPX1+I8eDfj9oDIuAtPJV93W+TUm/7O2KO4q2Jb1p98H258Al2sbuXxY2Y
+#p39zoim3sy5qPihjSWnUbccZdOBs0RPtHKj/K9Wo4A5fUjoYgHkmKYfbzwIDAQAB
+#AoGANVxIiXLMAs1fd23lc1Csb6aT7IuOzFkZV4/PnPv6UdanhcISsLklzcsCBoui
+#6GjW2Nj3L24wYeHpa3TFIa4ormiDWpvHx0xVJKPcrzpNFDell5LxrJfMS87mg5bV
+#Dbvwrkjtvz8bwsJrwD1Nh5lOBlxb1wYi0sPcD0SyaTHAwoECQQD5iDgqpxKovtlN
+#/KqIcuSoZO1aCpCkUb6jmDdBdiHv2zfFEtXoZme+P1FQw4BkcaVUtBm4WiJ2eCKK
+#oMrKyJNRAkEA1gOVV6kU6zCr42pZ4XHSKa9e2g2yiNCu5fo4tj7XGndIkWlBZOWF
+#k/TvI4BsIGZEm6nYbMLSp5xJJOoqEsp1HwJBAKDqloXy/hZyFMK1GOgrZ4espl+1
+#hndg+9aV97QwUUxTi1B8iBN5zpciT/cMTET6AMtx5VA8WBMb//J0JLLGzDECQChx
+#muprAJIFq6YZdgzdtqq8An/QsNmcHkFFzSvbqkjNHACm1H3dxiWU1xBtd4GT8gk8
+#yrKbCrY0GbqJKhRNAF8CQDCTpTAE9vNroABEFqV4Iwu7pUKzPY17Jevil6jHZ9s7
+#04WEc/7euPs+xnYcJWW4Ke+2wIjIK87FAehdv9cv7V4=
+#-----END RSA PRIVATE KEY-----
+#EOF
+
+	sshkeys = "${file("~/.ssh/id_rsa.pub")}"
+#	sshkeys = <<EOF
+#ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC5r4+7lxth7DB1kmrXtmQLfnhRt2WgpFYACRe2bn/WPBaTL6Ot/8mW4z7uY1z+4Ph8PvFg6wlVwsdE74SrCox+iGtPdrKODv1dxVR0Ai+NWF93w2Bo6/mV6rLOc1UdDCMjts3z15UYGcsIPwvtANJKtb7D72wu50KN8hHmvUA8wUlK5NL/6+WT6nLw77Qd9XAmWCKsstO+Fb1NCPs4AgXc9newSh1iwKguFtrQ7Mdn+gY9iWF9+3PXWY3d7oyewjIN9CDBWljSuw9dZo/6DRCNEq2BbdJV6aNAqM8tcSQibfsw7+JHZuG13EDeZs9wRlwTr2N4m1O178JBMxBjX3GB bubba@komander
+#EOF
+
+	connection {
+		host = "10.200.1.11"
+		port = "22"
+		type = "ssh"
+	#	timeout = "3m"
+	#	agent = "true"
+	#	agent_identity = ""
+	#	user = "centos"
+	#	password = ""
+	#	private_key = "${file("~/.ssh/id_rsa")}"
+	#	host_key = "${file("~/.ssh/id_rsa.pub")}"
+	}
+
+	provisioner "remote-exec" {
+		inline = [
+			"ip addr"
+		]
+	}
+
+}

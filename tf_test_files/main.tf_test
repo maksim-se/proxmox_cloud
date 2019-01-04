@@ -1,0 +1,77 @@
+provider "proxmox" {
+	pm_tls_insecure = true
+	pm_api_url = "${var.v_pm-api-url}"
+	pm_user = "${var.v_pm-user}"
+	pm_password = "${var.v_pm-pass}"
+}
+
+/* Uses cloud-init options from Proxmox 5.2 */
+resource "proxmox_vm_qemu" "kubetest" {
+
+	# node description
+	name = "tf-test1"
+	desc = "terraform kubernetes cloud-init node"
+	target_node = "bve"
+	clone = "centos7-ci-downloaded"
+	os_type = "centos"
+	onboot = "true"
+
+	# node hardware
+	cores = 2
+	sockets = 1
+	memory = 2048
+	disk {
+		id = "0"
+		storage = "data-hdd"
+		type = "scsi"
+		size = "10G"
+	}
+	network {
+		id = 0
+		model = "virtio"
+		bridge = "vmbr0"
+		firewall = "false"
+		link_down = "false"
+	}
+
+	# node connectivity
+	#ipconfig0 = "ip=10.200.1.11/27,gw=10.200.1.1"
+	#preprovision = true
+	ssh_forward_ip = "10.0.2.1"
+	ssh_user = "bubba"
+	ssh_private_key = <<EOF
+-----BEGIN RSA PRIVATE KEY-----
+MIICWwIBAAKBgQCZ2HXpNFeL1oJR2H4gPJ1guDBLfAVwP+fJ7sHZE/fm11Th69hK
+3o8G9mjL334J8wayt0tOMnBBDtjgkeChs/CFk3j4qyZmBcQiu63D7lVNSqoaus2W
+CMHCoCktbo1df5yPbXDXFrJKBTTU7O+bFr7rDXgdmRlOOTbfghD7CP5cEQIDAQAB
+AoGAehicm5P61vRLQQF8N8FjdVs4mO+4sTlGj7B5D/sVB5NlvlcatXCkOnZc/VBG
+C0dgzX1CurC0/iz2WmPrzumrvFvZv/l2B8Y4fV/d/Dv0OKFtpk8Cnyg+KVNz+YLX
+eUhNRy+r8/8lppwIH4YBK8cW/SrJp6U5baom7D7oU/CyXvECQQDPcb9pdcdwcwJO
+EF7paBktIpf6rMC10E4Jtcgu8vo3prry80pMO/spa9rnU47Yn4mGOHjKvfzv++Ki
+fDfoBPijAkEAvdsGhm4Cek3SNPntNavWWqYMOhbhW9rx0El5usPPbVWxNohSIDG6
+Funlk1aet+XA7S2O9Us36RyjG5s0rssfuwJAaWUgXCNz9eTo6eKVZj72c6Ec2EaH
+DpjL3VEXaQsYJ8g1OZR0TjE3VX8v09H3RIYh6Ciu7ksCxKcUKXu1J9PGwwJAGfBk
+0dUR7ZfYUnibGiwiGzx4iy85Fw2w4B5JzWSXYH7GuYaigdeJbzwBq8G36bQwSbdh
+ws3GE8lf15O6/O6vpQJAdNHD3038ojFi0CY1+GyAlGjidQ1CE9DYqJy56+LxjKn2
+ndZNg3+HJ+HyjZRKUSPXLmIVyNuBtewpN9PPx4lLUQ==
+-----END RSA PRIVATE KEY-----
+EOF
+
+	sshkeys = <<EOF
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC5r4+7lxth7DB1kmrXtmQLfnhRt2WgpFYACRe2bn/WPBaTL6Ot/8mW4z7uY1z+4Ph8PvFg6wlVwsdE74SrCox+iGtPdrKODv1dxVR0Ai+NWF93w2Bo6/mV6rLOc1UdDCMjts3z15UYGcsIPwvtANJKtb7D72wu50KN8hHmvUA8wUlK5NL/6+WT6nLw77Qd9XAmWCKsstO+Fb1NCPs4AgXc9newSh1iwKguFtrQ7Mdn+gY9iWF9+3PXWY3d7oyewjIN9CDBWljSuw9dZo/6DRCNEq2BbdJV6aNAqM8tcSQibfsw7+JHZuG13EDeZs9wRlwTr2N4m1O178JBMxBjX3GB bubba@komander
+EOF
+
+	provisioner "remote-exec" {
+		inline = [
+			"ip a"
+		]
+	}
+
+	provisioner "proxmox" {
+		action = "sshbackward"
+	}
+
+#	output "VM ID" {
+#		value = "${proxmox_vm_qemu.xxxxxx}"
+#	}
+}
