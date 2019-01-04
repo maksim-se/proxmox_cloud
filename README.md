@@ -121,9 +121,10 @@ EOF
 ```
 - Disable and remove NetworkManager and firewall
 ```console
-# for i in NetworkManager firewalld rhnsd; do systemctl mask $i; done
-# for i in NetworkManager firewalld rhnsd; do systemctl stop $i; done
-# yum remove $(rpm -qa | grep NetworkManager)
+# for i in NetworkManager firewalld; do systemctl disable $i; done
+# for i in NetworkManager firewalld; do systemctl stop $i; done
+# yum remove $(rpm -qa | grep -e NetworkManager -e firewalld)
+# systemctl daemon-reload
 ```
 - Remove unneeded dependencies
 ```console
