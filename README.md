@@ -3,7 +3,8 @@
 - Do regular install
 - Install some more useful tools
 ```bash
-# apt install vim mlocate screen mc parted rsync htop iotop nmap tcpdump mtr-tiny net-tools openvswitch-switch
+# apt install vim mlocate screen mc parted rsync htop iotop nmap tcpdump \
+mtr-tiny net-tools openvswitch-switch
 ```
 <hr>
 
@@ -18,7 +19,9 @@ Preinstalled images location: http://cloud.centos.org/centos/7/images/
 
 - Download selected image to Proxmox VE
 ```bash
-# mkdir -p /data/ci && cd /data/ci && wget http://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud-1809.qcow2
+# mkdir -p /data/ci && \
+cd /data/ci && \
+wget http://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud-1809.qcow2
 ```
 - Create new VM
 ```bash
