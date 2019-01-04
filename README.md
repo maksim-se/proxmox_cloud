@@ -156,7 +156,7 @@ https://github.com/Telmate/terraform-provider-proxmox
 ```
 - Add debug level and log path permanently (accepted after next login)
 ```console
-cat >> ~/.bash_profile <<EOF
+# cat >> ~/.bash_profile <<EOF
 # debug options: TRACE, DEBUG, INFO, WARN or ERROR
 export TF_LOG="DEBUG"
 export TF_LOG_PATH="/tmp/log"
