@@ -105,11 +105,11 @@ EOF
 ```
 - Install EPEL repository
 ```console
-# yum install epel-release
+# yum install -y epel-release
 ```
 - install additional packages
 ```console
-# yum install  net-tools rsync vim-enhanced nc mc wireshark tcpdump wget strace lynx links sysstat lsof deltarpm mlocate bash-completion nmap telnet screen iotop htop mtr traceroute ntpdate lshw ntp
+# yum install -y net-tools rsync vim-enhanced nc mc wireshark tcpdump wget strace lynx links sysstat lsof deltarpm mlocate bash-completion nmap telnet screen iotop htop mtr traceroute ntpdate lshw ntp
 ```
 - Disable SELinux
 ```console
@@ -132,11 +132,11 @@ EOF
 ```
 - Do full upgrade
 ```console
-# yum upgrade
+# yum upgrade -y
 ```
 - Install Cloud-Init
 ```console
-# yum install cloud-init
+# yum install -y cloud-init
 ```
 - Stop VM
 - Convert to template (right click -> "Convert to template")
